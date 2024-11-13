@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.commands.AimAtAprilTagCommand;
+import frc.robot.commands.FollowAprilTagCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -63,7 +65,11 @@ public class RobotContainer {
         }
       ).withTimeout(1.5);
 
-    mainController.leftBumper().whileTrue(quickTurn);
+    Command aimAtTag = new AimAtAprilTagCommand(m_driveSubsystem);
+    Command followTag = new FollowAprilTagCommand(m_driveSubsystem);
+    
+    mainController.leftBumper().whileTrue(aimAtTag);
+    mainController.rightBumper().whileTrue(followTag);
 
     m_driveSubsystem.setDefaultCommand(arcadeDrive);
     
