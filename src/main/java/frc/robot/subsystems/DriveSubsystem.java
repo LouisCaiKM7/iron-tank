@@ -5,11 +5,14 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotConstants;
 
 public class DriveSubsystem extends SubsystemBase {
     /**
@@ -41,16 +44,29 @@ public class DriveSubsystem extends SubsystemBase {
         motorRight.set(-rightSpeeds);
     }
 
+    public void setRPS(double leftRPS, double rightRPS) {
+        motorLeft.setControl(new VelocityVoltage(leftRPS));
+        motorRight.setControl(new VelocityVoltage(-rightRPS));
+    }
+
     // Run arcade drive based on setSpeeds
     public void setArcadeSpeed(double forwardSpeed, double turningSpeed) {
         double leftSpeed = forwardSpeed + turningSpeed;
         double rightSpeed = forwardSpeed - turningSpeed;
 
-        setSpeeds(leftSpeed, rightSpeed);
+        setRPS(leftSpeed, rightSpeed);
     }
 
     @Override
     public void periodic() {
-        // This method will be called once per scheduler run
+//         This method will be called once per scheduler run
+         motorLeft.getConfigurator().apply(new Slot0Configs().
+                 withKP(RobotConstants.TankConstants.TANK_PID.kP.get()).
+                 withKI(RobotConstants.TankConstants.TANK_PID.kI.get()).
+                 withKD(RobotConstants.TankConstants.TANK_PID.kD.get()));
+         motorRight.getConfigurator().apply(new Slot0Configs().
+                 withKP(RobotConstants.TankConstants.TANK_PID.kP.get()).
+                 withKI(RobotConstants.TankConstants.TANK_PID.kI.get()).
+                 withKD(RobotConstants.TankConstants.TANK_PID.kD.get()));
     }
 }
