@@ -5,11 +5,15 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotConstants;
 
 public class DriveSubsystem extends SubsystemBase {
     /**
@@ -41,16 +45,34 @@ public class DriveSubsystem extends SubsystemBase {
         motorRight.set(-rightSpeeds);
     }
 
+    public void setRPS(double leftRPS, double rightRPS) {
+        motorLeft.setControl(new VelocityVoltage(leftRPS));
+        motorRight.setControl(new VelocityVoltage(-rightRPS));
+    }
+
     // Run arcade drive based on setSpeeds
     public void setArcadeSpeed(double forwardSpeed, double turningSpeed) {
         double leftSpeed = forwardSpeed + turningSpeed;
         double rightSpeed = forwardSpeed - turningSpeed;
 
-        setSpeeds(leftSpeed, rightSpeed);
+        setRPS(
+                MathUtil.clamp(leftSpeed, -1.0, 1.0) * 16,
+                MathUtil.clamp(rightSpeed, -1.0, 1.0) * 16);
+//        setRPS(
+//                leftSpeed
+//                MathUtil.clamp(rightSpeed, -1.0, 1.0) * 16);
     }
 
     @Override
     public void periodic() {
+        motorLeft.getConfigurator().apply(new Slot0Configs()
+                .withKP(RobotConstants.TankConstants.TankPID.kP.get())
+                .withKI(RobotConstants.TankConstants.TankPID.kI.get())
+                .withKD(RobotConstants.TankConstants.TankPID.kD.get()));
+        motorRight.getConfigurator().apply(new Slot0Configs()
+                .withKP(RobotConstants.TankConstants.TankPID.kP.get())
+                .withKI(RobotConstants.TankConstants.TankPID.kI.get())
+                .withKD(RobotConstants.TankConstants.TankPID.kD.get()));
         // This method will be called once per scheduler run
     }
 }
