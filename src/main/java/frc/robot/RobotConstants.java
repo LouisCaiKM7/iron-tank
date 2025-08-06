@@ -12,11 +12,12 @@ public class RobotConstants {
         public static double GEAR_RATIO = 12.0;
         public static double WHEEL_TRACK = 0.548005; //M
         public static double WHEEL_RADIUS = Units.inchesToMeters(3);
-    }
 
-    public static class TankPID {
-        public static final TunableNumber kP = new TunableNumber("Tank_PID/KP", 0.1);
-        public static final TunableNumber kI = new TunableNumber("Tank_PID/KI", 0);
-        public static final TunableNumber kD = new TunableNumber("Tank_PID/KD", 0);
+
+        public static class TankPID {
+            public static final TunableNumber kP = new TunableNumber("Tank_PID/KP", 0.1);
+            public static final TunableNumber kI = new TunableNumber("Tank_PID/KI", 0);
+            public static final TunableNumber kD = new TunableNumber("Tank_PID/KD", 0);
+        }
     }
 }
