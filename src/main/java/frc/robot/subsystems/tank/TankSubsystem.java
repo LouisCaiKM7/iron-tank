@@ -6,6 +6,7 @@ package frc.robot.subsystems.tank;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotConstants.TankConstants.*;
 
@@ -35,5 +36,6 @@ public class TankSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        Logger.processInputs("Tank", inputs);
     }
 }

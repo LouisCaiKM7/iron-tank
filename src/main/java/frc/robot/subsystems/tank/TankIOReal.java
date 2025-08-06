@@ -75,13 +75,13 @@ public class TankIOReal implements TankIO {
         inputs.rightMotorVelocityRotPerSec = rightMotorVelocityRotPerSec.getValueAsDouble();
         if (RobotConstants.TUNING) {
             motorLeft.getConfigurator().apply(new Slot0Configs()
-                    .withKP(inputs.tankKP)
-                    .withKI(inputs.tankKI)
-                    .withKD(inputs.tankKD));
+                    .withKP(RobotConstants.TankConstants.TankPID.kP.get())
+                    .withKI(RobotConstants.TankConstants.TankPID.kI.get())
+                    .withKD(RobotConstants.TankConstants.TankPID.kD.get()));
             motorRight.getConfigurator().apply(new Slot0Configs()
-                    .withKP(inputs.tankKP)
-                    .withKI(inputs.tankKI)
-                    .withKD(inputs.tankKD));
+                    .withKP(RobotConstants.TankConstants.TankPID.kP.get())
+                    .withKI(RobotConstants.TankConstants.TankPID.kI.get())
+                    .withKD(RobotConstants.TankConstants.TankPID.kD.get()));
         }
     }
 }

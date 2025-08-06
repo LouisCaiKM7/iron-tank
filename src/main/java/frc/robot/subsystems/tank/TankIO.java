@@ -1,6 +1,5 @@
 package frc.robot.subsystems.tank;
 
-import frc.robot.RobotConstants;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface TankIO {
@@ -21,9 +20,5 @@ public interface TankIO {
         public double rightMotorStatorCurrentAmps = 0.0;
         public double rightMotorSupplyCurrentAmps = 0.0;
         public double rightMotorTempCelsius = 0.0;
-
-        public double tankKP = RobotConstants.TankConstants.TankPID.kP.get();
-        public double tankKI = RobotConstants.TankConstants.TankPID.kI.get();
-        public double tankKD = RobotConstants.TankConstants.TankPID.kD.get();
     }
 }
