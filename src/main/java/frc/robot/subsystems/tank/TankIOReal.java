@@ -13,8 +13,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class TankIOReal implements TankIO {
     TalonFX motorRight = new TalonFX(1, "rio");
@@ -42,8 +42,8 @@ public class TankIOReal implements TankIO {
     }
 
     public void setRPS(double leftRPS, double rightRPS) {
-        SmartDashboard.putNumber("DriveSubsystem/leftRPS", leftRPS);
-        SmartDashboard.putNumber("DriveSubsystem/rightRPS", -rightRPS);
+        Logger.recordOutput("DriveSubsystem/leftTargetRPS", leftRPS);
+        Logger.recordOutput("DriveSubsystem/rightTargetRPS", -rightRPS);
 
         motorLeft.setControl(new VelocityVoltage(leftRPS));
         motorRight.setControl(new VelocityVoltage(-rightRPS));
@@ -75,13 +75,13 @@ public class TankIOReal implements TankIO {
         inputs.rightMotorVelocityRotPerSec = rightMotorVelocityRotPerSec.getValueAsDouble();
         if (RobotConstants.TUNING) {
             motorLeft.getConfigurator().apply(new Slot0Configs()
-                    .withKP(inputs.tankKP)
-                    .withKI(inputs.tankKI)
-                    .withKD(inputs.tankKD));
+                    .withKP(RobotConstants.TankConstants.TankPID.kP.get())
+                    .withKI(RobotConstants.TankConstants.TankPID.kI.get())
+                    .withKD(RobotConstants.TankConstants.TankPID.kD.get()));
             motorRight.getConfigurator().apply(new Slot0Configs()
-                    .withKP(inputs.tankKP)
-                    .withKI(inputs.tankKI)
-                    .withKD(inputs.tankKD));
+                    .withKP(RobotConstants.TankConstants.TankPID.kP.get())
+                    .withKI(RobotConstants.TankConstants.TankPID.kI.get())
+                    .withKD(RobotConstants.TankConstants.TankPID.kD.get()));
         }
     }
 }
