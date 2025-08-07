@@ -1,10 +1,12 @@
 package frc.robot.subsystems.tank;
 
-import frc.robot.RobotConstants;
+// import frc.robot.RobotConstants;
+import edu.wpi.first.units.measure.AngularVelocity;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface TankIO {
-    void setRPS(double leftRPS, double rightRPS);
+
+    void setRPS(AngularVelocity leftRPS, AngularVelocity rightRPS);
 
     void updateInputs(TankIOInputs inputs);
 
@@ -22,8 +24,5 @@ public interface TankIO {
         public double rightMotorSupplyCurrentAmps = 0.0;
         public double rightMotorTempCelsius = 0.0;
 
-        public double tankKP = RobotConstants.TankConstants.TankPID.kP.get();
-        public double tankKI = RobotConstants.TankConstants.TankPID.kI.get();
-        public double tankKD = RobotConstants.TankConstants.TankPID.kD.get();
     }
 }

@@ -4,10 +4,17 @@
 
 package frc.robot.subsystems.tank;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.RobotConstants.TankConstants.*;
 
 public class TankSubsystem extends SubsystemBase {
@@ -23,15 +30,28 @@ public class TankSubsystem extends SubsystemBase {
      * @param forwardSpeed: m/s
      * @param turningSpeed: rad/s
      */
-    public void setArcadeSpeed(double forwardSpeed, double turningSpeed) {
-        double forwardRPS = forwardSpeed / 2 / Math.PI / WHEEL_RADIUS * GEAR_RATIO;
-        double turningRPS = turningSpeed * WHEEL_TRACK / 2 * GEAR_RATIO;
 
-        Logger.recordOutput("TankSubsystem/targetForwardSpeed", forwardSpeed);
-        Logger.recordOutput("TankSubsystem/targetTurningSpeed", turningSpeed);
+    private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(WHEEL_TRACK);
 
-        io.setRPS(forwardRPS + turningRPS, forwardRPS - turningRPS);
+    public void setArcadeSpeed(LinearVelocity forwardSpeed, AngularVelocity turningSpeed) {
+        DifferentialDriveWheelSpeeds wheelSpeeds =
+                kinematics.toWheelSpeeds(
+                    new ChassisSpeeds(forwardSpeed, MetersPerSecond.of(0),turningSpeed));
+
+//        AngularVelocity forwardRPS = RotationsPerSecond.of(forwardSpeed.div(WHEEL_RADIUS));
+
+        Logger.recordOutput("TankSubsystem/targetForwardSpeed", forwardSpeed.in(MetersPerSecond));
+        Logger.recordOutput("TankSubsystem/targetTurningSpeed", turningSpeed.in(RadiansPerSecond));
+
+        io.setRPS(chassisSpeedToMotorRPS(wheelSpeeds.leftMetersPerSecond), chassisSpeedToMotorRPS(wheelSpeeds.rightMetersPerSecond));
     }
+
+    public AngularVelocity chassisSpeedToMotorRPS(double chassisSpeedMetersPerSecond){
+        return RotationsPerSecond.of(chassisSpeedMetersPerSecond/(WHEEL_RADIUS.in(Meters))* 2* Math.PI).times(GEAR_RATIO);
+    }
+
+//    public double forwardRPS = forwardSpeed / 2 / Math.PI / WHEEL_RADIUS * GEAR_RATIO;
+//    public double turningRPS = turningSpeed * WHEEL_TRACK / 2 * GEAR_RATIO;
 
     @Override
     public void periodic() {
