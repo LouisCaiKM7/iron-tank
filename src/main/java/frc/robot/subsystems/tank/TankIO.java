@@ -1,9 +1,10 @@
 package frc.robot.subsystems.tank;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface TankIO {
-    void setRPS(double leftRPS, double rightRPS);
+    void setRPS(AngularVelocity leftRPS, AngularVelocity rightRPS);
 
     void updateInputs(TankIOInputs inputs);
 

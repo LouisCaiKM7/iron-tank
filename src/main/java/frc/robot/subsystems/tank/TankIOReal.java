@@ -16,6 +16,8 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotConstants;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 public class TankIOReal implements TankIO {
     TalonFX motorRight = new TalonFX(1, "rio");
     private final StatusSignal<AngularVelocity> rightMotorVelocityRotPerSec = motorRight.getVelocity();
@@ -41,12 +43,12 @@ public class TankIOReal implements TankIO {
         motorRightConfigurator.apply(motorOutputConfigs);
     }
 
-    public void setRPS(double leftRPS, double rightRPS) {
-        Logger.recordOutput("DriveSubsystem/leftTargetRPS", leftRPS);
-        Logger.recordOutput("DriveSubsystem/rightTargetRPS", -rightRPS);
+    public void setRPS(AngularVelocity leftRPS, AngularVelocity rightRPS) {
+        Logger.recordOutput("DriveSubsystem/TargetLeftRPS", leftRPS.in(RadiansPerSecond));
+        Logger.recordOutput("DriveSubsystem/TargetRightRPS", -rightRPS.in(RadiansPerSecond));
 
-        motorLeft.setControl(new VelocityVoltage(leftRPS));
-        motorRight.setControl(new VelocityVoltage(-rightRPS));
+        motorLeft.setControl(new VelocityVoltage(leftRPS.in(RadiansPerSecond)));
+        motorRight.setControl(new VelocityVoltage(-rightRPS.in(RadiansPerSecond)));
     }
 
     @Override
