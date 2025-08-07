@@ -65,8 +65,8 @@ public class RobotContainer {
                 m_tankSubsystem.run(
                         () -> {
                             m_tankSubsystem.setArcadeSpeed(
-                                    deadBand(-mainController.getLeftY() * RobotConstants.TankConstants.MAX_SPEED_METERS_PER_SECOND, 0.05),
-                                    deadBand(-mainController.getRightX() * RobotConstants.TankConstants.MAX_ANGULAR_SPEED_RAD_PER_SECOND, 0.05)
+                                    RobotConstants.TankConstants.MAX_SPEED.times(deadBand(-mainController.getLeftY(), 0.05)),
+                                    RobotConstants.TankConstants.MAX_ANGULAR_SPEED.times(deadBand(-mainController.getRightX(), 0.05))
                             );
                         }
                 );
