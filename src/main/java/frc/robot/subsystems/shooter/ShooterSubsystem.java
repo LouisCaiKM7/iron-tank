@@ -2,19 +2,21 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.roller.RollerIO;
-import frc.robot.subsystems.roller.RollerSubsystem;
+import frc.robot.subsystems.roller.RollerIOInputsAutoLogged;
+import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-public class ShooterSubsystem extends RollerSubsystem {
+public class ShooterSubsystem extends SubsystemBase {
 
     private RollerIO io;
+    private RollerIOInputsAutoLogged inputs = new RollerIOInputsAutoLogged();
 
     public ShooterSubsystem(RollerIO io) {
-        super(io, "Shooter");
         this.io = io;
         io.updateConfigs(
                 RobotConstants.ShooterConstants.ShooterPID.kP.get(),
@@ -28,6 +30,8 @@ public class ShooterSubsystem extends RollerSubsystem {
 
     @Override
     public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Shooter", inputs);
         if (RobotConstants.TUNING) {
             io.updateConfigs(
                     RobotConstants.ShooterConstants.ShooterPID.kP.get(),
