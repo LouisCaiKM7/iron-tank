@@ -13,10 +13,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotConstants;
-
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 public class TankIOReal implements TankIO {
     TalonFX motorRight = new TalonFX(1, "rio");
@@ -44,9 +41,6 @@ public class TankIOReal implements TankIO {
     }
 
     public void setRPS(AngularVelocity leftRPS, AngularVelocity rightRPS) {
-        SmartDashboard.putNumber("DriveSubsystem/leftRPS", leftRPS.in(RotationsPerSecond));
-        SmartDashboard.putNumber("DriveSubsystem/rightRPS", rightRPS.in(RotationsPerSecond));
-
         motorLeft.setControl(new VelocityVoltage(leftRPS));
         motorRight.setControl(new VelocityVoltage(rightRPS));
     }

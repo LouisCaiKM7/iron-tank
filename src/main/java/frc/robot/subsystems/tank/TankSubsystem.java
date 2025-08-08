@@ -48,7 +48,7 @@ public class TankSubsystem extends SubsystemBase {
                 new ChassisSpeeds(forwardSpeed, MetersPerSecond.of(0), turningSpeed));
 
         SmartDashboard.putNumber("TankSubsystem/forwardSpeed", forwardSpeed.in(MetersPerSecond));
-        SmartDashboard.putNumber("TankSubsystem/turningSpeed", forwardSpeed.in(MetersPerSecond));
+        SmartDashboard.putNumber("TankSubsystem/turningSpeed", turningSpeed.in(RadiansPerSecond));
 
         io.setRPS(
                 RotationsPerSecond.of(wheelSpeeds.leftMetersPerSecond / (WHEEL_RADIUS.in(Meters) * 2 * Math.PI) * GEAR_RATIO),
@@ -61,14 +61,9 @@ public class TankSubsystem extends SubsystemBase {
         Logger.processInputs("Tank", inputs);
 
         updatePoseFromRPS();
-
         Logger.recordOutput("Tank/TankPose", robotPose);
-        System.out.println(robotPose);
     }
 
-    /**
-     * 基于左右轮 RPS 计算机器人位置 使用积分方法计算位置，不依赖陀螺仪
-     */
     private void updatePoseFromRPS() {
         double currentTime = System.currentTimeMillis() / 1000.0; // 转换为秒
         double deltaTime = currentTime - lastTime;
@@ -110,10 +105,6 @@ public class TankSubsystem extends SubsystemBase {
         // 更新 robotPose
         robotPose = new Pose2d(currentX, currentY, new Rotation2d(currentAngle));
 
-        // 更新 SmartDashboard
-        SmartDashboard.putNumber("TankSubsystem/currentX", currentX);
-        SmartDashboard.putNumber("TankSubsystem/currentY", currentY);
-        SmartDashboard.putNumber("TankSubsystem/currentAngle", Math.toDegrees(currentAngle));
         SmartDashboard.putNumber("TankSubsystem/leftRPS", inputs.leftMotorVelocityRotPerSec);
         SmartDashboard.putNumber("TankSubsystem/rightRPS", inputs.rightMotorVelocityRotPerSec);
 

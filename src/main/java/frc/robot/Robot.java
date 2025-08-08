@@ -31,7 +31,6 @@ public class Robot extends LoggedRobot {
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
 
-        Logger.recordMetadata("ProjectName", "Iron-Tank");
         Logger.addDataReceiver(new NT4Publisher());
         Logger.start();
     }
