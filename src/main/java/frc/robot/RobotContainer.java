@@ -58,8 +58,7 @@ public class RobotContainer {
         if (RobotBase.isSimulation()) {
             m_tankSubsystem = new TankSubsystem(new TankIOSim());
             m_shooterSubsystem = new ShooterSubsystem(new RollerIOSim(
-                    1,
-                    2,
+                    1, 6.0 / 25,
                     new SimpleMotorFeedforward(RobotConstants.ShooterConstants.ShooterPID.kS.get(),
                             RobotConstants.ShooterConstants.ShooterPID.kV.get()),
                     new ProfiledPIDController(
@@ -72,7 +71,7 @@ public class RobotContainer {
         } else {
             m_tankSubsystem = new TankSubsystem(new TankIOReal());
             m_shooterSubsystem = new ShooterSubsystem(new RollerIOReal(
-                    5,
+                    2,
                     "rio",
                     100,
                     100,
@@ -98,7 +97,7 @@ public class RobotContainer {
                             );
                         }
                 );
-        mainController.a().toggleOnTrue(new ShootCommand(m_shooterSubsystem));
+        mainController.leftBumper().toggleOnTrue(new ShootCommand(m_shooterSubsystem));
 
         m_tankSubsystem.setDefaultCommand(arcadeDrive);
     }

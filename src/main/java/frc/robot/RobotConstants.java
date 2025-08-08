@@ -19,7 +19,7 @@ public class RobotConstants {
 
 
         public static class TankPID {
-            public static final TunableNumber kP = new TunableNumber("Tank_PID/KP", 0.3);
+            public static final TunableNumber kP = new TunableNumber("Tank_PID/KP", 0.4);
             public static final TunableNumber kI = new TunableNumber("Tank_PID/KI", 0);
             public static final TunableNumber kD = new TunableNumber("Tank_PID/KD", 0);
         }
