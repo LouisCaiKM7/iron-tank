@@ -45,10 +45,10 @@ public class TankIOReal implements TankIO {
 
     public void setRPS(AngularVelocity leftRPS, AngularVelocity rightRPS) {
         Logger.recordOutput("DriveSubsystem/TargetLeftRPS", leftRPS.in(RadiansPerSecond));
-        Logger.recordOutput("DriveSubsystem/TargetRightRPS", -rightRPS.in(RadiansPerSecond));
+        Logger.recordOutput("DriveSubsystem/TargetRightRPS", rightRPS.in(RadiansPerSecond));
 
-        motorLeft.setControl(new VelocityVoltage(leftRPS.in(RadiansPerSecond)));
-        motorRight.setControl(new VelocityVoltage(-rightRPS.in(RadiansPerSecond)));
+        motorLeft.setControl(new VelocityVoltage(-leftRPS.in(RadiansPerSecond)));
+        motorRight.setControl(new VelocityVoltage(rightRPS.in(RadiansPerSecond)));
     }
 
     @Override

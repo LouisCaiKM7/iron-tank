@@ -18,7 +18,6 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.RobotConstants.TankConstants.*;
 
-
 public class TankSubsystem extends SubsystemBase {
 
     private final TankIO io;
@@ -57,9 +56,8 @@ public class TankSubsystem extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Tank", inputs);
         updatePoseFromRPS();
-        
+
         Logger.recordOutput("Tank/RobotPose", robotPose);
-        System.out.println(robotPose);
     }
 
     private AngularVelocity chassisSpeedToMotorRPS(double chassisSpeedMetersPerSecond) {
