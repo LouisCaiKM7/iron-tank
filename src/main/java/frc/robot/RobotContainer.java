@@ -9,14 +9,18 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.command.ShootCommand;
+import frc.robot.command.TurnCommand;
 import frc.robot.subsystems.roller.RollerIOReal;
 import frc.robot.subsystems.roller.RollerIOSim;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.tank.TankIOReal;
 import frc.robot.subsystems.tank.TankIOSim;
 import frc.robot.subsystems.tank.TankSubsystem;
+
+import static edu.wpi.first.units.Units.Degrees;
 
 
 /**
@@ -97,7 +101,12 @@ public class RobotContainer {
                             );
                         }
                 );
-        mainController.leftBumper().toggleOnTrue(new ShootCommand(m_shooterSubsystem));
+        mainController.rightTrigger().whileTrue(new ShootCommand(m_shooterSubsystem));
+        mainController.start().onTrue(Commands.runOnce(() -> {
+            m_tankSubsystem.resetGyro();
+        }).ignoringDisable(true));
+        mainController.leftBumper().whileTrue(new TurnCommand(Degrees.of(0), m_tankSubsystem, mainController));
+        mainController.rightBumper().whileTrue(new TurnCommand(Degrees.of(-145), m_tankSubsystem, mainController));
 
         m_tankSubsystem.setDefaultCommand(arcadeDrive);
     }

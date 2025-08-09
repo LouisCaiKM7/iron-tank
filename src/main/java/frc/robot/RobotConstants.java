@@ -19,7 +19,7 @@ public class RobotConstants {
 
 
         public static class TankPID {
-            public static final TunableNumber kP = new TunableNumber("Tank_PID/KP", 0.4);
+            public static final TunableNumber kP = new TunableNumber("Tank_PID/KP", 0.3);
             public static final TunableNumber kI = new TunableNumber("Tank_PID/KI", 0);
             public static final TunableNumber kD = new TunableNumber("Tank_PID/KD", 0);
         }
@@ -35,6 +35,15 @@ public class RobotConstants {
             public static final TunableNumber kA = new TunableNumber("Shooter_PID/KA", 0);
             public static final TunableNumber kV = new TunableNumber("Shooter_PID/KV", 0);
             public static final TunableNumber kS = new TunableNumber("Shooter_PID/KS", 0);
+        }
+    }
+
+    public static class PigeonConstants {
+
+        public static class PigeonPID {
+            public static final TunableNumber kP = new TunableNumber("Pigeon_PID/KP", 1.5);
+            public static final TunableNumber kI = new TunableNumber("Pigeon_PID/KI", 0);
+            public static final TunableNumber kD = new TunableNumber("Pigeon_PID/KD", 0);
         }
     }
 }
