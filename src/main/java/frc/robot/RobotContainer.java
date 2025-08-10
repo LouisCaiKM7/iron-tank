@@ -10,7 +10,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.intake.PivotIOReal;
+import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.roller.RollerIOReal;
 import frc.robot.subsystems.roller.RollerIOSim;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
@@ -31,6 +35,7 @@ public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private TankSubsystem m_tankSubsystem;
     private ShooterSubsystem m_shooterSubsystem;
+    private IntakeSubsystem m_intakeSubsystem;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -68,6 +73,21 @@ public class RobotContainer {
                             RobotConstants.ShooterConstants.ShooterPID.kD.get(),
                             new TrapezoidProfile.Constraints(15, 1)
                     )));
+            m_intakeSubsystem = new IntakeSubsystem(
+                    new RollerIOSim(
+                            1,
+                            2,
+                            new SimpleMotorFeedforward(RobotConstants.IntakeConstants.IntakeRollerPID.kS.get(),
+                                    RobotConstants.IntakeConstants.IntakeRollerPID.kV.get()),
+                            new ProfiledPIDController(
+                                    RobotConstants.IntakeConstants.IntakeRollerPID.kP.get(),
+                                    RobotConstants.IntakeConstants.IntakeRollerPID.kI.get(),
+                                    RobotConstants.IntakeConstants.IntakeRollerPID.kD.get(),
+                                    new TrapezoidProfile.Constraints(15, 1)
+                            )),
+                    new PivotIOSim()
+            );
+
         } else {
             m_tankSubsystem = new TankSubsystem(new TankIOReal());
             m_shooterSubsystem = new ShooterSubsystem(new RollerIOReal(
@@ -78,6 +98,16 @@ public class RobotContainer {
                     false,
                     false
             ));
+            m_intakeSubsystem = new IntakeSubsystem(
+                    new RollerIOReal(
+                            RobotConstants.IntakeConstants.ROLLER_MOTOR_ID,
+                            "rio",
+                            100,
+                            100,
+                            false,
+                            false),
+                    new PivotIOReal()
+            );
         }
     }
 
@@ -99,6 +129,8 @@ public class RobotContainer {
                 );
 
         mainController.a().whileTrue(new ShootCommand(m_shooterSubsystem));
+
+        mainController.leftBumper().toggleOnTrue(new IntakeCommand(m_intakeSubsystem));
 
         m_tankSubsystem.setDefaultCommand(arcadeDrive);
     }
