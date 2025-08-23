@@ -4,11 +4,13 @@
 
 package frc.robot.subsystems.tank;
 
+import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,13 +24,15 @@ public class TankSubsystem extends SubsystemBase {
 
     private final TankIO io;
     private final TankIOInputsAutoLogged inputs = new TankIOInputsAutoLogged();
+    public PigeonIMU pigeonIMU = new PigeonIMU(3);
+
     Pose2d robotPose = new Pose2d();
     // 添加基于 RPS 的位置计算变量
     private double lastLeftRPS = 0.0;
     private double lastRightRPS = 0.0;
     private double currentX = 0.0;
     private double currentY = 0.0;
-    private double currentAngle = 0.0;
+    private Angle currentAngle = Degrees.of(0);
     private double lastTime = 0.0;
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(WHEEL_TRACK);
 
@@ -51,6 +55,10 @@ public class TankSubsystem extends SubsystemBase {
         io.setRPS(chassisSpeedToMotorRPS(wheelSpeeds.leftMetersPerSecond), chassisSpeedToMotorRPS(wheelSpeeds.rightMetersPerSecond));
     }
 
+    public void resetGyro() {
+        pigeonIMU.setYaw(0);
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
@@ -58,10 +66,15 @@ public class TankSubsystem extends SubsystemBase {
         updatePoseFromRPS();
 
         Logger.recordOutput("Tank/RobotPose", robotPose);
+        Logger.recordOutput("Tank/Yaw", pigeonIMU.getYaw());
     }
 
     private AngularVelocity chassisSpeedToMotorRPS(double chassisSpeedMetersPerSecond) {
         return RotationsPerSecond.of(chassisSpeedMetersPerSecond / (WHEEL_RADIUS.in(Meters) * 2 * Math.PI)).times(GEAR_RATIO);
+    }
+
+    public Pose2d getRobotPose() {
+        return robotPose;
     }
 
     private void updatePoseFromRPS() {
@@ -89,21 +102,20 @@ public class TankSubsystem extends SubsystemBase {
 
         // 积分计算位置变化
         double deltaDistance = forwardSpeed * deltaTime;
-        double deltaAngle = angularSpeed * deltaTime;
 
-        // 更新角度
-        currentAngle += deltaAngle;
+        currentAngle = Degrees.of(pigeonIMU.getYaw());
+
 
         // 计算位置变化（考虑当前角度）
-        double deltaX = deltaDistance * Math.cos(currentAngle);
-        double deltaY = deltaDistance * Math.sin(currentAngle);
+        double deltaX = deltaDistance * Math.cos(currentAngle.magnitude());
+        double deltaY = deltaDistance * Math.sin(currentAngle.magnitude());
 
         // 更新位置
         currentX += deltaX;
         currentY += deltaY;
 
         // 更新 robotPose
-        robotPose = new Pose2d(currentX, currentY, new Rotation2d(currentAngle));
+        robotPose = new Pose2d(currentX, currentY, new Rotation2d(currentAngle.in(Radian)));
 
         SmartDashboard.putNumber("TankSubsystem/leftRPS", inputs.leftMotorVelocityRotPerSec);
         SmartDashboard.putNumber("TankSubsystem/rightRPS", inputs.rightMotorVelocityRotPerSec);
@@ -113,4 +125,5 @@ public class TankSubsystem extends SubsystemBase {
         lastRightRPS = inputs.rightMotorVelocityRotPerSec;
         lastTime = currentTime;
     }
+
 }
