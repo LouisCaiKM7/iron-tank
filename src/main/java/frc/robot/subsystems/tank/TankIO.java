@@ -21,5 +21,8 @@ public interface TankIO {
         public double rightMotorStatorCurrentAmps = 0.0;
         public double rightMotorSupplyCurrentAmps = 0.0;
         public double rightMotorTempCelsius = 0.0;
+
+        public double leftPosition = 0.0;
+        public double rightPosition = 0.0;
     }
 }

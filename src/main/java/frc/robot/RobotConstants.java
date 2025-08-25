@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 
 public class RobotConstants {
     public static final boolean TUNING = true;
+    public static final boolean FORWARD = true;
 
     public static class TankConstants {
         public static LinearVelocity MAX_SPEED = MetersPerSecond.of(2);
@@ -43,6 +44,14 @@ public class RobotConstants {
             public static final TunableNumber kP = new TunableNumber("Pigeon_PID/KP", 1.5);
             public static final TunableNumber kI = new TunableNumber("Pigeon_PID/KI", 0);
             public static final TunableNumber kD = new TunableNumber("Pigeon_PID/KD", 0);
+        }
+    }
+
+    public static class ForwardConstants {
+        public static class ForwardPID {
+            public static final TunableNumber kP = new TunableNumber("Forward_PID/KP", 0.3);
+            public static final TunableNumber kI = new TunableNumber("Forward_PID/KI", 0);
+            public static final TunableNumber kD = new TunableNumber("Forward_PID/KD", 0);
         }
     }
 }

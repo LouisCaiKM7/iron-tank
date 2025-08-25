@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -25,7 +26,8 @@ public class TankSubsystem extends SubsystemBase {
     private final TankIO io;
     private final TankIOInputsAutoLogged inputs = new TankIOInputsAutoLogged();
     public PigeonIMU pigeonIMU = new PigeonIMU(3);
-
+    public DifferentialDriveOdometry tankOdometry =
+            new DifferentialDriveOdometry(new Rotation2d(), 0, 0, new Pose2d());
     Pose2d robotPose = new Pose2d();
     // 添加基于 RPS 的位置计算变量
     private double lastLeftRPS = 0.0;
@@ -59,6 +61,10 @@ public class TankSubsystem extends SubsystemBase {
         pigeonIMU.setYaw(0);
     }
 
+    public void resetOdometry() {
+        tankOdometry.resetPose(new Pose2d());
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
@@ -67,6 +73,7 @@ public class TankSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Tank/RobotPose", robotPose);
         Logger.recordOutput("Tank/Yaw", pigeonIMU.getYaw());
+        Logger.recordOutput("Tank/measuredDistance", getRobotPose().getY());
     }
 
     private AngularVelocity chassisSpeedToMotorRPS(double chassisSpeedMetersPerSecond) {
@@ -88,39 +95,21 @@ public class TankSubsystem extends SubsystemBase {
             return;
         }
 
+
         // 计算左右轮的平均 RPS
         double avgLeftRPS = (inputs.leftMotorVelocityRotPerSec + lastLeftRPS) / 2.0;
         double avgRightRPS = (inputs.rightMotorVelocityRotPerSec + lastRightRPS) / 2.0;
 
-        // 将 RPS 转换为线速度 (m/s)
-        double leftWheelSpeed = avgLeftRPS / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
-        double rightWheelSpeed = avgRightRPS / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
 
-        // 计算前进速度和角速度
-        double forwardSpeed = (leftWheelSpeed + rightWheelSpeed) / 2.0;
-        double angularSpeed = (rightWheelSpeed - leftWheelSpeed) / WHEEL_TRACK.in(Meters);
-
-        // 积分计算位置变化
-        double deltaDistance = forwardSpeed * deltaTime;
+        double leftDistance = -inputs.leftPosition / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
+        double rightDistance = inputs.rightPosition / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
 
         currentAngle = Degrees.of(pigeonIMU.getYaw());
 
+        robotPose = tankOdometry.update(new Rotation2d(currentAngle), leftDistance, rightDistance);
 
-        // 计算位置变化（考虑当前角度）
-        double deltaX = deltaDistance * Math.cos(currentAngle.magnitude());
-        double deltaY = deltaDistance * Math.sin(currentAngle.magnitude());
-
-        // 更新位置
-        currentX += deltaX;
-        currentY += deltaY;
-
-        // 更新 robotPose
-        robotPose = new Pose2d(currentX, currentY, new Rotation2d(currentAngle.in(Radian)));
-
-        SmartDashboard.putNumber("TankSubsystem/leftRPS", inputs.leftMotorVelocityRotPerSec);
-        SmartDashboard.putNumber("TankSubsystem/rightRPS", inputs.rightMotorVelocityRotPerSec);
-
-        // 保存当前值作为下次计算的 last 值
+        SmartDashboard.putNumber("TankSubsystem/leftDistance", leftDistance);
+        SmartDashboard.putNumber("TankSubsystem/rightDistance", rightDistance); // 保存当前值作为下次计算的 last 值
         lastLeftRPS = inputs.leftMotorVelocityRotPerSec;
         lastRightRPS = inputs.rightMotorVelocityRotPerSec;
         lastTime = currentTime;

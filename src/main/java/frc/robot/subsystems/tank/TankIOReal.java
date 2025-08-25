@@ -9,10 +9,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import frc.robot.RobotConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -25,12 +22,14 @@ public class TankIOReal implements TankIO {
     private final StatusSignal<Current> rightMotorStatorCurrentAmps = motorRight.getStatorCurrent();
     private final StatusSignal<Current> rightMotorSupplyCurrentAmps = motorRight.getSupplyCurrent();
     private final StatusSignal<Temperature> rightMotorTempCelsius = motorRight.getDeviceTemp();
+    private final StatusSignal<Angle> rightPosition = motorRight.getPosition();
     TalonFX motorLeft = new TalonFX(0, "rio");
     private final StatusSignal<AngularVelocity> leftMotorVelocityRotPerSec = motorLeft.getVelocity();
     private final StatusSignal<Voltage> leftMotorAppliedVolts = motorLeft.getSupplyVoltage();
     private final StatusSignal<Current> leftMotorStatorCurrentAmps = motorLeft.getStatorCurrent();
     private final StatusSignal<Current> leftMotorSupplyCurrentAmps = motorLeft.getSupplyCurrent();
     private final StatusSignal<Temperature> leftMotorTempCelsius = motorLeft.getDeviceTemp();
+    private final StatusSignal<Angle> leftPosition = motorLeft.getPosition();
     TalonFXConfigurator motorRightConfigurator = motorRight.getConfigurator();
     TalonFXConfigurator motorLeftConfigurator = motorLeft.getConfigurator();
 
@@ -59,22 +58,26 @@ public class TankIOReal implements TankIO {
                 leftMotorSupplyCurrentAmps,
                 leftMotorTempCelsius,
                 leftMotorVelocityRotPerSec,
+                leftPosition,
                 rightMotorAppliedVolts,
                 rightMotorStatorCurrentAmps,
                 rightMotorSupplyCurrentAmps,
                 rightMotorTempCelsius,
-                rightMotorVelocityRotPerSec
+                rightMotorVelocityRotPerSec,
+                rightPosition
         );
         inputs.leftMotorAppliedVolts = leftMotorAppliedVolts.getValueAsDouble();
         inputs.leftMotorStatorCurrentAmps = leftMotorStatorCurrentAmps.getValueAsDouble();
         inputs.leftMotorSupplyCurrentAmps = leftMotorSupplyCurrentAmps.getValueAsDouble();
         inputs.leftMotorTempCelsius = leftMotorTempCelsius.getValueAsDouble();
         inputs.leftMotorVelocityRotPerSec = leftMotorVelocityRotPerSec.getValueAsDouble();
+        inputs.leftPosition = leftPosition.getValueAsDouble();
         inputs.rightMotorAppliedVolts = rightMotorAppliedVolts.getValueAsDouble();
         inputs.rightMotorStatorCurrentAmps = rightMotorStatorCurrentAmps.getValueAsDouble();
         inputs.rightMotorSupplyCurrentAmps = rightMotorSupplyCurrentAmps.getValueAsDouble();
         inputs.rightMotorTempCelsius = rightMotorTempCelsius.getValueAsDouble();
         inputs.rightMotorVelocityRotPerSec = rightMotorVelocityRotPerSec.getValueAsDouble();
+        inputs.rightPosition = rightPosition.getValueAsDouble();
         if (RobotConstants.TUNING) {
             motorLeft.getConfigurator().apply(new Slot0Configs()
                     .withKP(RobotConstants.TankConstants.TankPID.kP.get())
