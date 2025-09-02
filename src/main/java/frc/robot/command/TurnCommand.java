@@ -55,9 +55,7 @@ public class TurnCommand extends Command {
                         deadBand(-Controller.getLeftY(), 0.05)).times(0.5),
                 DegreesPerSecond.of(
                         turningPIDCtrl.calculate(
-                                mTankSubsystem.getRobotPose().getRotation().getDegrees()
-                        ))
-        );
+                                mTankSubsystem.getRobotPose().getRotation().getDegrees())));
 
         Logger.recordOutput("Tank/targetAngle", targetAngle);
         Logger.recordOutput("Tank/measuredAngle", mTankSubsystem.getRobotPose().getRotation().getDegrees());

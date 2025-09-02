@@ -15,14 +15,13 @@ public interface TankIO {
         public double leftMotorStatorCurrentAmps = 0.0;
         public double leftMotorSupplyCurrentAmps = 0.0;
         public double leftMotorTempCelsius = 0.0;
+        public double leftPosition = 0.0;
 
         public double rightMotorVelocityRotPerSec = 0.0;
         public double rightMotorAppliedVolts = 0.0;
         public double rightMotorStatorCurrentAmps = 0.0;
         public double rightMotorSupplyCurrentAmps = 0.0;
         public double rightMotorTempCelsius = 0.0;
-
-        public double leftPosition = 0.0;
         public double rightPosition = 0.0;
     }
 }

@@ -11,9 +11,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -35,6 +37,7 @@ public class TankSubsystem extends SubsystemBase {
     private double currentX = 0.0;
     private double currentY = 0.0;
     private Angle currentAngle = Degrees.of(0);
+    private double currentSimAngle = 0.0;
     private double lastTime = 0.0;
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(WHEEL_TRACK);
 
@@ -57,19 +60,25 @@ public class TankSubsystem extends SubsystemBase {
         io.setRPS(chassisSpeedToMotorRPS(wheelSpeeds.leftMetersPerSecond), chassisSpeedToMotorRPS(wheelSpeeds.rightMetersPerSecond));
     }
 
-    public void resetGyro() {
-        pigeonIMU.setYaw(0);
-    }
 
     public void resetOdometry() {
         tankOdometry.resetPose(new Pose2d());
+    }
+
+    public void resetGyro() {
+        pigeonIMU.setYaw(0);
     }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Tank", inputs);
-        updatePoseFromRPS();
+        updateSimPoseFromRPS();
+        if (RobotBase.isReal()) {
+            updatePoseFromRPS();
+        } else {
+
+        }
 
         Logger.recordOutput("Tank/RobotPose", robotPose);
         Logger.recordOutput("Tank/Yaw", pigeonIMU.getYaw());
@@ -86,7 +95,6 @@ public class TankSubsystem extends SubsystemBase {
 
     private void updatePoseFromRPS() {
         double currentTime = System.currentTimeMillis() / 1000.0; // 转换为秒
-        double deltaTime = currentTime - lastTime;
 
         if (lastTime == 0.0) {
             lastTime = currentTime;
@@ -94,12 +102,6 @@ public class TankSubsystem extends SubsystemBase {
             lastRightRPS = inputs.rightMotorVelocityRotPerSec;
             return;
         }
-
-
-        // 计算左右轮的平均 RPS
-        double avgLeftRPS = (inputs.leftMotorVelocityRotPerSec + lastLeftRPS) / 2.0;
-        double avgRightRPS = (inputs.rightMotorVelocityRotPerSec + lastRightRPS) / 2.0;
-
 
         double leftDistance = -inputs.leftPosition / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
         double rightDistance = inputs.rightPosition / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
@@ -109,10 +111,60 @@ public class TankSubsystem extends SubsystemBase {
         robotPose = tankOdometry.update(new Rotation2d(currentAngle), leftDistance, rightDistance);
 
         SmartDashboard.putNumber("TankSubsystem/leftDistance", leftDistance);
-        SmartDashboard.putNumber("TankSubsystem/rightDistance", rightDistance); // 保存当前值作为下次计算的 last 值
+        SmartDashboard.putNumber("TankSubsystem/rightDistance", rightDistance);
         lastLeftRPS = inputs.leftMotorVelocityRotPerSec;
         lastRightRPS = inputs.rightMotorVelocityRotPerSec;
         lastTime = currentTime;
     }
 
+    private void updateSimPoseFromRPS() {
+        double currentTime = System.currentTimeMillis() / 1000.0; // 转换为秒
+        double deltaTime = currentTime - lastTime;
+
+        if (lastTime == 0.0) {
+            lastTime = currentTime;
+            lastLeftRPS = inputs.leftMotorVelocityRotPerSec;
+            lastRightRPS = inputs.rightMotorVelocityRotPerSec;
+            return;
+        }
+
+        // 计算左右轮的平均 RPS
+        double avgLeftRPS = (inputs.leftMotorVelocityRotPerSec + lastLeftRPS) / 2.0;
+        double avgRightRPS = (inputs.rightMotorVelocityRotPerSec + lastRightRPS) / 2.0;
+
+        // 将 RPS 转换为线速度 (m/s)
+        double leftWheelSpeed = avgLeftRPS / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
+        double rightWheelSpeed = avgRightRPS / GEAR_RATIO * (WHEEL_RADIUS.in(Meters) * 2 * Math.PI);
+
+        // 计算前进速度和角速度
+        double forwardSpeed = (leftWheelSpeed + rightWheelSpeed) / 2.0;
+        double angularSpeed = (rightWheelSpeed - leftWheelSpeed) / WHEEL_TRACK.in(Units.Meters);
+
+        // 积分计算位置变化
+        double deltaDistance = forwardSpeed * deltaTime;
+        double deltaAngle = angularSpeed * deltaTime;
+
+        // 更新角度
+        currentSimAngle -= deltaAngle;
+
+        // 计算位置变化（考虑当前角度）
+        double deltaX = deltaDistance * Math.cos(currentSimAngle);
+        double deltaY = deltaDistance * Math.sin(currentSimAngle);
+
+        // 更新位置
+        currentX += deltaX;
+        currentY += deltaY;
+
+        // 更新 robotPose
+        robotPose = new Pose2d(currentX, currentY, new Rotation2d(currentSimAngle));
+
+
+        // 保存当前值作为下次计算的 last 值
+        lastLeftRPS = inputs.leftMotorVelocityRotPerSec;
+        lastRightRPS = inputs.rightMotorVelocityRotPerSec;
+        lastTime = currentTime;
+
+        Logger.recordOutput("TankSim/angularSpeed", angularSpeed);
+        Logger.recordOutput("TankSim/deltaTime", deltaTime);
+    }
 }

@@ -6,12 +6,15 @@ package frc.robot;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.command.ForwardCommand;
+import frc.robot.command.PoseCommand;
 import frc.robot.command.ShootCommand;
 import frc.robot.command.TurnCommand;
 import frc.robot.subsystems.roller.RollerIOReal;
@@ -103,14 +106,20 @@ public class RobotContainer {
                             );
                         }
                 );
-        mainController.rightTrigger().whileTrue(new ShootCommand(m_shooterSubsystem));
-        mainController.start().onTrue(Commands.runOnce(() ->
-        {
-            m_tankSubsystem.resetOdometry();
-        }).ignoringDisable(true));
+        mainController.leftTrigger().whileTrue(new ShootCommand(m_shooterSubsystem));
+        mainController.start().onTrue(Commands.runOnce(() -> {
+                    m_tankSubsystem.resetOdometry();
+                }).ignoringDisable(true)
+        );
+        mainController.start().onTrue(Commands.runOnce(() -> {
+                    m_tankSubsystem.resetGyro();
+                }).ignoringDisable(true)
+        );
         mainController.leftBumper().whileTrue(new TurnCommand(Degrees.of(0), m_tankSubsystem, mainController));
         mainController.rightBumper().whileTrue(new TurnCommand(Degrees.of(-145), m_tankSubsystem, mainController));
         mainController.a().whileTrue(new ForwardCommand(Meters.of(2), m_tankSubsystem, mainController));
+        mainController.b().whileTrue(new PoseCommand(new Pose2d(3, 4, new Rotation2d(Degrees.of(90))), m_tankSubsystem, mainController));
+
 
         m_tankSubsystem.setDefaultCommand(arcadeDrive);
     }

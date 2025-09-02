@@ -54,4 +54,12 @@ public class RobotConstants {
             public static final TunableNumber kD = new TunableNumber("Forward_PID/KD", 0);
         }
     }
+
+    public static class PoseConstants {
+        public static class PosePID {
+            public static final TunableNumber kP = new TunableNumber("Pose_PID/KP", 0.3);
+            public static final TunableNumber kI = new TunableNumber("Pose_PID/KI", 0);
+            public static final TunableNumber kD = new TunableNumber("Pose_PID/KD", 0);
+        }
+    }
 }
