@@ -15,7 +15,7 @@ import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.RobotConstants.PoseConstants.PosePID.*;
+import static frc.robot.RobotConstants.ForwardConstants.ForwardPID.*;
 
 public class ForwardCommand extends Command {
     /**
