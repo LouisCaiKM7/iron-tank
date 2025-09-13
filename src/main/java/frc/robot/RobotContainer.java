@@ -1,83 +1,84 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.TankDrive.TankCommands;
+import frc.robot.TankDrive.TankSubsystem;
+import frc.robot.TankDrive.Commands.TankDriveToPoseCommand;
+import frc.robot.TankDrive.Side.SideIOReal;
+import frc.robot.TankDrive.Side.SideIOSim;
+import frc.robot.TankDrive.Imu.ImuIOPigeon2;
+import frc.robot.TankDrive.Imu.ImuIOSim;
+import frc.robot.TankDrive.TankSubsystem.TankDrivingStates;
 
+import static edu.wpi.first.units.Units.*;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
- */
+/** Robot container that works in simulation without hardware. */
 public class RobotContainer {
-    // The robot's subsystems and commands are defined here...
-    private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+    /* ---------- Joysticks ---------- */
+    private final CommandXboxController controller = new CommandXboxController(0);
+    private TankSubsystem tankSubsystem;
 
-    // Creates the Xbox controller to drive the robot
-    CommandXboxController mainController = new CommandXboxController(0);
+    private void configureSubsystems() {
+        if(Robot.isReal()){
+            tankSubsystem = new TankSubsystem(TankConstants.tankConfigsReal,
+             TankDrivingStates.PURE_DRIVE,
+             new  Pair<>(new SideIOReal(
+                TankConstants.leftReal, "Left"),
+                 new SideIOReal(TankConstants.rightReal, "Right")),
+                 new ImuIOPigeon2(TankConstants.leftReal) );
+        }else{
+            tankSubsystem = new TankSubsystem(TankConstants.tankConfigsSim,
+             TankDrivingStates.PURE_DRIVE,
+             new  Pair<>(new SideIOSim(
+                TankConstants.leftSim, "Left"),
+                 new SideIOSim(TankConstants.rightSim, "Right")),
+                 new ImuIOSim() );
+        }
+    }
 
-    /**
-     * The container for the robot. Contains subsystems, OI devices, and commands.
-     */
     public RobotContainer() {
-        // Configure the trigger bindings
+        configureSubsystems();
         configureBindings();
     }
 
-    // Deadband command to eliminate drifting
-    public static double deadBand(double value, double tolerance) {
-        return Math.abs(value) > tolerance ? value : 0;
-        /*
-        If you can't understand the code above, it is equivalent to the following lines:
-        if (value < tolerance && value > -tolerance) {
-            return 0;
-        } else {
-            return value;
-        }
-        */
-    }
-
-    /**
-     * Use this method to define your trigger->command mappings.
-     */
     private void configureBindings() {
-        // Put any trigger->command mappings here.
+        tankSubsystem.setDefaultCommand(
+                TankCommands.driveWithJoystick(
+                        tankSubsystem,
+                        /* forward/back */ () -> -controller.getLeftY(),   // -1..1
+                        /* turn         */ () ->  controller.getRightX(), // -1..1
+                        tankSubsystem.getTankLimit().maxLinearVelocity(),  // max speed
+                        RadiansPerSecond.of(4.0),                            // max turn
+                        MetersPerSecond.of(0.01),                          // deadband
+                        RadiansPerSecond.of(0.01))
+        );
 
-        // Run motor with setSpeeds command
-        Command arcadeDrive =
-                m_driveSubsystem.run(
-                        () -> {
-                            m_driveSubsystem.setArcadeSpeed(
-                                    deadBand(-mainController.getLeftY(), 0.1),
-                                    deadBand(mainController.getRightX(), 0.1)
-                            );
-                        }
-                );
+        /* "A" button stops the robot */
+        controller.a().whileTrue(TankCommands.stop(tankSubsystem));
 
-        Command tankDrive =
-                m_driveSubsystem.run(
-                        () -> {
-                            m_driveSubsystem.setSpeeds(
-                                    deadBand(-mainController.getLeftY(), 0.1),
-                                    deadBand(-mainController.getRightY(), 0.1)
-                            );
-                        }
-                );
+        controller.b().onTrue(TankCommands.resetPose(tankSubsystem, new Pose3d()));
 
-        m_driveSubsystem.setDefaultCommand(arcadeDrive);
-
-        mainController.a().toggleOnTrue(tankDrive);
+        controller.x().whileTrue(TankCommands.driveToPose(
+            tankSubsystem, ()->tankSubsystem.getEstimatedPose().toPose2d(),
+             ()->new Pose2d(), new PIDController(
+                AimToPoseTranslationPIDNT.kP.getValue(),
+                AimToPoseTranslationPIDNT.kI.getValue(),
+                AimToPoseTranslationPIDNT.kD.getValue()),
+              new PIDController(
+                AimToPoseRotationPIDNT.kP.getValue(),
+                AimToPoseRotationPIDNT.kI.getValue(),
+                AimToPoseRotationPIDNT.kD.getValue()
+              ), Meters.of(0.1), Degrees.of(1.7)));
     }
 
+    /* ---------- Auto placeholder ---------- */
     public Command getAutonomousCommand() {
-        // An example command will be run in autonomous
-        return new Command() {
-        };
+        return Commands.none();
     }
 }
